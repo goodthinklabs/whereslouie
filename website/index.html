@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Where's Louie? 🦆</title>
+  <meta name="description" content="Follow Louie the rubber duck on his adventures across the country. Track his GPS route and read stories from everyone he's met.">
+  <meta property="og:title" content="Where's Louie? 🦆">
+  <meta property="og:description" content="A rubber duck with a GPS tracker, sent on an adventure. Follow his route and the community that carries him.">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Navigation ──────────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">🦆 Where's Louie?</a>
+      <div class="nav-links">
+        <a href="#map">Route</a>
+        <a href="#stories">Stories</a>
+        <a href="#about">About</a>
+        <a href="#" class="nav-cta" id="submit-btn">📸 I Met Louie!</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-duck" aria-hidden="true">🦆</div>
+      <h1>Where's Louie?</h1>
+      <p class="hero-sub">A rubber duck with a GPS backpack, sent out into the world.<br>Follow his route. Read his adventures. Pass him on.</p>
+      <div class="hero-status" id="hero-status">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Loading last position…</span>
+      </div>
+      <div class="hero-actions">
+        <a href="#map" class="btn btn-primary">📍 See the Map</a>
+        <a href="#stories" class="btn btn-secondary">📖 Read Stories</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Stats bar ────────────────────────────────────────────────────────── -->
+  <section class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat">
+        <span class="stat-value" id="stat-stops">—</span>
+        <span class="stat-label">stops</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="stat-miles">—</span>
+        <span class="stat-label">miles traveled</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="stat-stories">—</span>
+        <span class="stat-label">community stories</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="stat-battery">—</span>
+        <span class="stat-label">battery</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Map ──────────────────────────────────────────────────────────────── -->
+  <section class="section" id="map">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Louie's Route</h2>
+        <p class="section-sub">Every GPS ping logged as he travels. Gaps happen when he's between mesh nodes — he's just exploring off-grid.</p>
+      </div>
+      <div class="map-wrapper">
+        <div id="leaflet-map"></div>
+        <div class="map-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--start"></span> Start
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--current"></span> Current
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--stop"></span> Community stop
+          </div>
+        </div>
+      </div>
+      <div class="map-no-data" id="map-no-data" style="display:none">
+        <p>No GPS data yet — Louie hasn't been spotted by a Meshtastic node. Check back soon!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stories ──────────────────────────────────────────────────────────── -->
+  <section class="section section--dark" id="stories">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Community Stories</h2>
+        <p class="section-sub">Everyone who's spent time with Louie. The good, the weird, the wherever.</p>
+      </div>
+
+      <div class="posts-grid" id="posts-grid">
+        <!-- Populated by app.js -->
+      </div>
+
+      <div class="posts-empty" id="posts-empty" style="display:none">
+        <div class="posts-empty-duck">🦆</div>
+        <p>No stories yet — Louie just set off! Be the first.</p>
+      </div>
+
+      <div class="posts-loading" id="posts-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading stories…</p>
+      </div>
+
+      <div class="submit-cta">
+        <h3>Did you meet Louie?</h3>
+        <p>Share where you took him and what you got up to. Photos very much welcome.</p>
+        <a href="#" class="btn btn-primary" id="submit-cta-btn">📸 Share Your Story</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About ────────────────────────────────────────────────────────────── -->
+  <section class="section" id="about">
+    <div class="section-inner">
+      <div class="about-grid">
+        <div class="about-text">
+          <h2>What's this all about?</h2>
+          <p>Louie is a rubber duck with a <strong>Meshtastic T1000-E GPS tracker</strong> strapped to his tiny backpack. He's inspired by <a href="https://en.wikipedia.org/wiki/HitchBOT" target="_blank" rel="noopener">Hitchbot</a> — the Canadian robot that hitchhiked across countries relying entirely on the kindness of strangers.</p>
+          <p>Louie travels the same way. He gets passed from person to person, going wherever they take him. He doesn't have a destination. He just goes.</p>
+          <p>His position is broadcast over the <strong>Meshtastic mesh network</strong> — a community-run network of LoRa radio nodes — and logged here in real time. Wherever there are nodes, we know where Louie is.</p>
+          <p>This project is an experiment in community, trust, and the fun of building unnecessary things. If you've got Louie, take him somewhere interesting. Then pass him on.</p>
+          <div class="tech-stack">
+            <span class="tech-tag">Meshtastic</span>
+            <span class="tech-tag">LoRa</span>
+            <span class="tech-tag">Google Sheets</span>
+            <span class="tech-tag">GitHub Pages</span>
+            <span class="tech-tag">Leaflet.js</span>
+          </div>
+        </div>
+        <div class="about-image">
+          <div class="about-duck-card">
+            <div class="duck-big" aria-hidden="true">🦆</div>
+            <div class="duck-info">
+              <div class="duck-info-row">
+                <span class="duck-label">Name</span>
+                <span class="duck-value">Louie</span>
+              </div>
+              <div class="duck-info-row">
+                <span class="duck-label">Species</span>
+                <span class="duck-value">Rubber Duck</span>
+              </div>
+              <div class="duck-info-row">
+                <span class="duck-label">Tracker</span>
+                <span class="duck-value">Meshtastic T1000-E</span>
+              </div>
+              <div class="duck-info-row">
+                <span class="duck-label">Network</span>
+                <span class="duck-value">Meshtastic mesh</span>
+              </div>
+              <div class="duck-info-row">
+                <span class="duck-label">Destination</span>
+                <span class="duck-value">Wherever you take him</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">🦆 Where's Louie?</div>
+      <p class="footer-sub">A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.<br>Built with Meshtastic, Google Workspace, and a rubber duck.</p>
+      <div class="footer-links">
+        <a href="https://meshtastic.org" target="_blank" rel="noopener">Meshtastic</a>
+        <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Post card template (hidden, cloned by JS) ────────────────────────── -->
+  <template id="post-card-template">
+    <article class="post-card">
+      <div class="post-card-photo">
+        <img class="post-photo-img" src="" alt="" loading="lazy">
+        <div class="post-photo-placeholder" aria-hidden="true">🦆</div>
+      </div>
+      <div class="post-card-body">
+        <div class="post-meta">
+          <span class="post-number"></span>
+          <span class="post-location">📍 </span>
+        </div>
+        <p class="post-story"></p>
+        <div class="post-footer">
+          <span class="post-name"></span>
+          <span class="post-date"></span>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs=" crossorigin=""></script>
+
+  <script src="app.js"></script>
+</body>
+</html>
