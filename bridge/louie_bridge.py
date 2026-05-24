@@ -26,6 +26,7 @@ load_dotenv()
 
 # ── Config ────────────────────────────────────────────────────────────────────
 TRACKI_URL      = "https://app.trackimo.com"
+NOMINATIM_URL   = "https://nominatim.openstreetmap.org/reverse"
 TRACKI_USER     = os.getenv("TRACKI_USER", "")
 TRACKI_PASS     = os.getenv("TRACKI_PASS", "")
 CLIENT_ID       = os.getenv("TRACKI_CLIENT_ID", "")
@@ -177,6 +178,67 @@ def device_id_hint(raw):
     return raw.get("id") or raw.get("deviceId") or ""
 
 
+# ── Reverse geocoding ─────────────────────────────────────────────────────────
+
+def reverse_geocode(lat, lng):
+    """Snap exact GPS coordinates to the nearest city centre using Nominatim.
+
+    Returns (city_display, city_lat, city_lng).
+    Falls back to (None, lat, lng) on any error so the bridge never blocks.
+    """
+    try:
+        resp = requests.get(
+            NOMINATIM_URL,
+            params={
+                "format":         "json",
+                "lat":            lat,
+                "lon":            lng,
+                "zoom":           10,        # city-level match
+                "addressdetails": 1,
+            },
+            headers={
+                "User-Agent": "WhereIsLouie/1.0 (goodthinklabs.com)",
+                "Accept-Language": "en",
+            },
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        addr = data.get("address", {})
+
+        # City name: prefer city > town > village > municipality > county
+        city_name = (
+            addr.get("city")
+            or addr.get("town")
+            or addr.get("village")
+            or addr.get("municipality")
+            or addr.get("county")
+            or "Unknown"
+        )
+
+        # State: use two-letter code for US ("US-FL" -> "FL"), full name elsewhere
+        country_code = addr.get("country_code", "").upper()
+        state = addr.get("state", "")
+        if country_code == "US":
+            iso = addr.get("ISO3166-2-lvl4", "")   # e.g. "US-FL"
+            state_code = iso.split("-")[-1] if "-" in iso else state[:2].upper()
+            city_display = f"{city_name}, {state_code}" if state_code else city_name
+        else:
+            city_display = f"{city_name}, {state}" if state else city_name
+
+        # Nominatim returns the centroid of the matched object at zoom=10
+        city_lat = float(data.get("lat", lat))
+        city_lng = float(data.get("lon", lng))
+
+        log.info(f"City snapped → {city_display} ({city_lat:.4f}, {city_lng:.4f})")
+        return city_display, city_lat, city_lng
+
+    except Exception as e:
+        log.warning(f"Reverse geocode failed ({e}) — keeping raw coordinates")
+        return None, lat, lng
+
+
 # ── Forwarding ────────────────────────────────────────────────────────────────
 
 def forward_to_sheets(pos):
@@ -246,6 +308,12 @@ def main():
                         f"Position: lat={pos['lat']:.6f} lng={pos['lng']:.6f} "
                         f"bat={pos['battery_pct']}% speed={pos['speed']}"
                     )
+                    # Snap to city centre for privacy — no home addresses on the map
+                    city, city_lat, city_lng = reverse_geocode(pos["lat"], pos["lng"])
+                    pos["city"]     = city
+                    pos["city_lat"] = city_lat
+                    pos["city_lng"] = city_lng
+
                     if args.test:
                         print(json.dumps(pos, indent=2))
                     else:

@@ -59,7 +59,8 @@ function doPost(e) {
     // Add header row if sheet is empty
     if (sheet.getLastRow() === 0) {
       sheet.appendRow([
-        "timestamp", "lat", "lng", "altitude", "battery_pct", "speed", "snr", "node_id"
+        "timestamp", "lat", "lng", "altitude", "battery_pct", "speed", "snr", "node_id",
+        "city", "city_lat", "city_lng"
       ]);
     }
 
@@ -67,11 +68,14 @@ function doPost(e) {
       body.timestamp,
       body.lat,
       body.lng,
-      body.altitude  ?? "",
+      body.altitude    ?? "",
       body.battery_pct ?? "",
-      body.speed     ?? "",
-      body.snr       ?? "",
-      body.node_id   ?? "",
+      body.speed       ?? "",
+      body.snr         ?? "",
+      body.node_id     ?? "",
+      body.city        ?? "",
+      body.city_lat    ?? "",
+      body.city_lng    ?? "",
     ]);
 
     return jsonResponse({ ok: true, message: "Position logged" });
@@ -110,7 +114,9 @@ function getPositions() {
   const sheet = getSheet(SHEET_POSITIONS);
   if (!sheet || sheet.getLastRow() < 2) return [];
 
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 8).getValues();
+  // Read up to 11 columns; older rows may only have 8 — handled gracefully below
+  const numCols = Math.max(sheet.getLastColumn(), 8);
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, numCols).getValues();
   return rows
     .filter(r => r[0] && r[1] && r[2])   // must have timestamp, lat, lng
     .map(r => ({
@@ -122,6 +128,9 @@ function getPositions() {
       speed:       r[5] !== "" ? Number(r[5]) : null,
       snr:         r[6] !== "" ? Number(r[6]) : null,
       node_id:     r[7] || "",
+      city:        r[8]  || null,
+      city_lat:    (r[9]  !== "" && r[9]  != null) ? Number(r[9])  : null,
+      city_lng:    (r[10] !== "" && r[10] != null) ? Number(r[10]) : null,
     }));
 }
 

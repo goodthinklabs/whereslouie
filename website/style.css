@@ -653,6 +653,54 @@ a:hover { color: var(--teal-light); }
 
 /* ── Leaflet custom markers ──────────────────────────────────────────────── */
 
+/* City-stop pin: dot + label side by side */
+.city-pin {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.city-pin-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: 2px solid #fff;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.city-pin-dot--start {
+  background: #4ade80;
+}
+
+.city-pin-label {
+  background: rgba(30, 30, 30, 0.82);
+  color: #f0eeea;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 20px;
+  line-height: 1.5;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+.city-pin-label--current {
+  background: rgba(59, 147, 167, 0.88);
+  color: #fff;
+}
+
+/* Duck marker + city label wrapper */
+.duck-pin {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+}
+
 .duck-marker {
   font-size: 1.8rem;
   line-height: 1;

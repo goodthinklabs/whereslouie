@@ -91,7 +91,7 @@ function updateHeroStatus() {
 
   if (!latest) {
     dot.className  = "status-dot offline";
-    text.textContent = "No positions yet — Louie hasn't been spotted on the mesh.";
+    text.textContent = "No positions yet — Louie hasn't set off yet.";
     return;
   }
 
@@ -99,16 +99,17 @@ function updateHeroStatus() {
   const hoursAgo   = (Date.now() - lastSeen.getTime()) / 3_600_000;
   const timeStr    = formatRelativeTime(lastSeen);
   const battery    = latest.battery_pct != null ? ` · 🔋 ${Math.round(latest.battery_pct)}%` : "";
+  const cityStr    = latest.city ? ` · 📍 ${latest.city}` : "";
 
   if (hoursAgo < 1) {
     dot.className    = "status-dot live";
-    text.textContent = `Last seen ${timeStr}${battery}`;
+    text.textContent = `Last seen ${timeStr}${cityStr}${battery}`;
   } else if (hoursAgo < STALE_THRESHOLD_HOURS) {
     dot.className    = "status-dot stale";
-    text.textContent = `Last seen ${timeStr}${battery}`;
+    text.textContent = `Last seen ${timeStr}${cityStr}${battery}`;
   } else {
     dot.className    = "status-dot offline";
-    text.textContent = `Last seen ${timeStr}${battery} — might be off-grid`;
+    text.textContent = `Last seen ${timeStr}${cityStr}${battery} — might be off-grid`;
   }
 }
 
@@ -153,6 +154,36 @@ function toRad(deg) { return deg * Math.PI / 180; }
 
 // ── Map rendering ─────────────────────────────────────────────────────────────
 
+/**
+ * Return the display [lat, lng] for a position.
+ * Prefers city-snapped coordinates; falls back to raw GPS.
+ */
+function displayCoords(pos) {
+  return (pos.city_lat != null && pos.city_lng != null)
+    ? [pos.city_lat, pos.city_lng]
+    : [pos.lat, pos.lng];
+}
+
+/**
+ * Collapse consecutive positions in the same city into one entry so we don't
+ * stack dozens of pins on the same spot. Each unique consecutive city = one pin.
+ * Positions with no city info are kept as-is.
+ */
+function deduplicateCities(pts) {
+  const result = [];
+  let lastCity = undefined;
+  for (const p of pts) {
+    if (p.city == null || p.city !== lastCity) {
+      result.push(p);
+      lastCity = p.city;
+    } else {
+      // Same city as previous — update the entry so the timestamp stays current
+      result[result.length - 1] = p;
+    }
+  }
+  return result;
+}
+
 function renderMap() {
   if (positions.length === 0) {
     document.getElementById("map-no-data").style.display = "";
@@ -160,9 +191,11 @@ function renderMap() {
     return;
   }
 
-  const latlngs = positions.map(p => [p.lat, p.lng]);
+  // Deduplicate to unique city stops for clean map rendering
+  const stops    = deduplicateCities(positions);
+  const latlngs  = stops.map(displayCoords);
 
-  // Route polyline
+  // Route polyline connecting city centres
   L.polyline(latlngs, {
     color:     "#3b93a7",
     weight:    3,
@@ -170,52 +203,91 @@ function renderMap() {
     dashArray: null,
   }).addTo(map);
 
-  // Start marker (green dot)
-  L.marker(latlngs[0], {
-    icon: L.divIcon({
-      html:      '<div class="start-marker"></div>',
-      className: "",
-      iconSize:  [14, 14],
-      iconAnchor:[7, 7],
-    }),
-  })
-    .bindTooltip("Louie's journey began here 🦆", { direction: "top" })
-    .addTo(map);
+  // City stop markers — labelled dot for each unique city
+  stops.forEach((stop, i) => {
+    const coord    = displayCoords(stop);
+    const isFirst  = i === 0;
+    const isLast   = i === stops.length - 1;
+    const cityName = stop.city || null;
+    const timeStr  = formatRelativeTime(new Date(stop.timestamp));
 
-  // Community stop markers (yellow numbered)
-  posts.forEach((post, i) => {
-    // Find the closest position to the post's timestamp for the map pin
-    // Since posts don't have lat/lng directly, we skip map pinning unless
-    // a position is close in time. Show them as timeline markers below.
-    // For now just number them near the current route centroid (future: geocode location name).
+    if (isLast) {
+      // Current position — duck emoji + city label
+      const duckHtml = cityName
+        ? `<div class="duck-pin">
+             <div class="duck-marker">🦆</div>
+             <span class="city-pin-label city-pin-label--current">${cityName}</span>
+           </div>`
+        : `<div class="duck-marker">🦆</div>`;
+
+      L.marker(coord, {
+        icon: L.divIcon({
+          html:       duckHtml,
+          className:  "",
+          iconSize:   null,
+          iconAnchor: [18, 36],
+        }),
+      })
+        .addTo(map)
+        .bindPopup(buildLatestPopup(), { maxWidth: 260 });
+
+    } else if (isFirst) {
+      // Start marker — green dot + city label
+      const startHtml = cityName
+        ? `<div class="city-pin city-pin--start">
+             <div class="city-pin-dot city-pin-dot--start"></div>
+             <span class="city-pin-label">${cityName}</span>
+           </div>`
+        : `<div class="start-marker"></div>`;
+
+      L.marker(coord, {
+        icon: L.divIcon({
+          html:       startHtml,
+          className:  "",
+          iconSize:   null,
+          iconAnchor: [7, 7],
+        }),
+      })
+        .addTo(map)
+        .bindTooltip(`Louie's journey began here 🦆`, { direction: "top" });
+
+    } else {
+      // Intermediate city stop — teal dot + label
+      const stopHtml = cityName
+        ? `<div class="city-pin">
+             <div class="city-pin-dot"></div>
+             <span class="city-pin-label">${cityName}</span>
+           </div>`
+        : `<div class="city-pin">
+             <div class="city-pin-dot"></div>
+           </div>`;
+
+      L.marker(coord, {
+        icon: L.divIcon({
+          html:       stopHtml,
+          className:  "",
+          iconSize:   null,
+          iconAnchor: [7, 7],
+        }),
+      })
+        .addTo(map)
+        .bindPopup(
+          `<b>${cityName || "Unknown location"}</b><br>Louie passed through ${timeStr}`,
+          { maxWidth: 200 }
+        );
+    }
   });
 
-  // Current / latest position — duck emoji marker
-  const currentPos = latlngs[latlngs.length - 1];
-  const duckIcon = L.divIcon({
-    html:      '<div class="duck-marker">🦆</div>',
-    className: "",
-    iconSize:  [36, 36],
-    iconAnchor:[18, 36],
-  });
-
-  const duckMarker = L.marker(currentPos, { icon: duckIcon })
-    .addTo(map)
-    .bindPopup(buildLatestPopup(), { maxWidth: 260 });
-
-  // Fit map to route
+  // Fit map to all city stops
   map.fitBounds(L.latLngBounds(latlngs).pad(0.15));
 }
 
 function buildLatestPopup() {
   if (!latest) return "<b>🦆 Louie</b>";
-  const timeStr = formatRelativeTime(new Date(latest.timestamp));
-  const bat     = latest.battery_pct != null ? `<br>🔋 ${Math.round(latest.battery_pct)}%` : "";
-  const alt     = latest.altitude    != null ? `<br>⛰ ${latest.altitude}m alt` : "";
-  return `
-    <b>🦆 Louie</b><br>
-    Last seen ${timeStr}${bat}${alt}
-  `;
+  const timeStr  = formatRelativeTime(new Date(latest.timestamp));
+  const bat      = latest.battery_pct != null ? `<br>🔋 ${Math.round(latest.battery_pct)}%` : "";
+  const cityLine = latest.city ? `<br>📍 ${latest.city}` : "";
+  return `<b>🦆 Louie</b>${cityLine}<br>Last seen ${timeStr}${bat}`;
 }
 
 // ── Blog posts ────────────────────────────────────────────────────────────────
