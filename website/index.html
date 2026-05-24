@@ -81,7 +81,7 @@
     <div class="section-inner">
       <div class="section-header">
         <h2>Louie's Route</h2>
-        <p class="section-sub">Every GPS ping logged as he travels. Gaps happen when he's between mesh nodes — he's just exploring off-grid.</p>
+        <p class="section-sub">Every GPS ping logged as he travels. Gaps happen between cellular updates — he's just exploring off-grid.</p>
       </div>
       <div class="map-wrapper">
         <div id="leaflet-map"></div>
@@ -98,7 +98,7 @@
         </div>
       </div>
       <div class="map-no-data" id="map-no-data" style="display:none">
-        <p>No GPS data yet — Louie hasn't been spotted by a Meshtastic node. Check back soon!</p>
+        <p>No GPS data yet — check back soon!</p>
       </div>
     </div>
   </section>
@@ -139,13 +139,13 @@
       <div class="about-grid">
         <div class="about-text">
           <h2>What's this all about?</h2>
-          <p>Louie is a rubber duck with a <strong>Meshtastic T1000-E GPS tracker</strong> strapped to his tiny backpack. He's inspired by <a href="https://en.wikipedia.org/wiki/HitchBOT" target="_blank" rel="noopener">Hitchbot</a> — the Canadian robot that hitchhiked across countries relying entirely on the kindness of strangers.</p>
+          <p>Louie is a rubber duck with a <strong>Tracki GPS tracker</strong> strapped to his tiny backpack. He's inspired by <a href="https://en.wikipedia.org/wiki/HitchBOT" target="_blank" rel="noopener">Hitchbot</a> — the Canadian robot that hitchhiked across countries relying entirely on the kindness of strangers.</p>
           <p>Louie travels the same way. He gets passed from person to person, going wherever they take him. He doesn't have a destination. He just goes.</p>
-          <p>His position is broadcast over the <strong>Meshtastic mesh network</strong> — a community-run network of LoRa radio nodes — and logged here in real time. Wherever there are nodes, we know where Louie is.</p>
+          <p>His position is reported over the <strong>Tracki cellular network</strong> and logged here every 5 minutes. Wherever he goes, we know where Louie is.</p>
           <p>This project is an experiment in community, trust, and the fun of building unnecessary things. If you've got Louie, take him somewhere interesting. Then pass him on.</p>
           <div class="tech-stack">
-            <span class="tech-tag">Meshtastic</span>
-            <span class="tech-tag">LoRa</span>
+            <span class="tech-tag">Tracki GPS</span>
+            <span class="tech-tag">Cellular</span>
             <span class="tech-tag">Google Sheets</span>
             <span class="tech-tag">GitHub Pages</span>
             <span class="tech-tag">Leaflet.js</span>
@@ -165,11 +165,11 @@
               </div>
               <div class="duck-info-row">
                 <span class="duck-label">Tracker</span>
-                <span class="duck-value">Meshtastic T1000-E</span>
+                <span class="duck-value">Tracki GPS</span>
               </div>
               <div class="duck-info-row">
                 <span class="duck-label">Network</span>
-                <span class="duck-value">Meshtastic mesh</span>
+                <span class="duck-value">Cellular (4G)</span>
               </div>
               <div class="duck-info-row">
                 <span class="duck-label">Destination</span>
@@ -186,9 +186,9 @@
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-logo">🦆 Where's Louie?</div>
-      <p class="footer-sub">A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.<br>Built with Meshtastic, Google Workspace, and a rubber duck.</p>
+      <p class="footer-sub">A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.<br>Built with Tracki GPS, Google Workspace, and a rubber duck.</p>
       <div class="footer-links">
-        <a href="https://meshtastic.org" target="_blank" rel="noopener">Meshtastic</a>
+        <a href="https://tracki.com" target="_blank" rel="noopener">Tracki GPS</a>
         <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a>
       </div>
     </div>
