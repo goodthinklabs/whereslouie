@@ -116,8 +116,9 @@ function updateHeroStatus() {
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 
 function updateStats() {
-  // Number of community stops = approved posts
-  document.getElementById("stat-stops").textContent   = posts.length || "0";
+  // Count unique cities visited
+  const uniqueCities = deduplicateCities(positions).length;
+  document.getElementById("stat-stops").textContent   = uniqueCities || "0";
 
   // Rough distance in miles from route
   const miles = computeRouteMiles(positions);
@@ -212,20 +213,26 @@ function renderMap() {
     const timeStr  = formatRelativeTime(new Date(stop.timestamp));
 
     if (isLast) {
-      // Current position — duck emoji + city label
+      // Current position — rubber duck SVG + city label
+      const duckSvg = `<svg class="duck-marker" viewBox="0 0 108 85" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="46" cy="67" rx="44" ry="22" fill="#FFD93D"/>
+        <circle cx="70" cy="38" r="24" fill="#FFD93D"/>
+        <path d="M90 31 L107 28 Q109 37 107 44 L90 43Z" fill="#FF8C38"/>
+        <line x1="90" y1="37" x2="107" y2="36" stroke="#D4692A" stroke-width="1.2" opacity="0.45"/>
+        <circle cx="80" cy="27" r="5.5" fill="#1a1a1a"/>
+        <circle cx="81.5" cy="25.5" r="2" fill="white"/>
+        <path d="M14 64 Q32 54 50 64" stroke="#E6B800" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+      </svg>`;
       const duckHtml = cityName
-        ? `<div class="duck-pin">
-             <div class="duck-marker">🦆</div>
-             <span class="city-pin-label city-pin-label--current">${cityName}</span>
-           </div>`
-        : `<div class="duck-marker">🦆</div>`;
+        ? `<div class="duck-pin">${duckSvg}<span class="city-pin-label city-pin-label--current">${cityName}</span></div>`
+        : duckSvg;
 
       L.marker(coord, {
         icon: L.divIcon({
           html:       duckHtml,
           className:  "",
           iconSize:   null,
-          iconAnchor: [18, 36],
+          iconAnchor: [18, 29],
         }),
       })
         .addTo(map)

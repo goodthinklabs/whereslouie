@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Where's Louie? 🦆</title>
+  <title>Where's Louie?</title>
   <meta name="description" content="Follow Louie the rubber duck on his adventures across the country. Track his GPS route and read stories from everyone he's met.">
-  <meta property="og:title" content="Where's Louie? 🦆">
+  <meta property="og:title" content="Where's Louie?">
   <meta property="og:description" content="A rubber duck with a GPS tracker, sent on an adventure. Follow his route and the community that carries him.">
   <meta property="og:type" content="website">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -21,15 +21,37 @@
 </head>
 <body>
 
+  <!-- ── Reusable rubber duck SVG (hidden, referenced via <use>) ────────────── -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="duck" viewBox="0 0 108 85">
+      <!-- Body -->
+      <ellipse cx="46" cy="67" rx="44" ry="22" fill="#FFD93D"/>
+      <!-- Head (overlaps body top to form neck) -->
+      <circle cx="70" cy="38" r="24" fill="#FFD93D"/>
+      <!-- Beak -->
+      <path d="M90 31 L107 28 Q109 37 107 44 L90 43Z" fill="#FF8C38"/>
+      <!-- Beak centre line (subtle) -->
+      <line x1="90" y1="37" x2="107" y2="36" stroke="#D4692A" stroke-width="1.2" opacity="0.45"/>
+      <!-- Eye -->
+      <circle cx="80" cy="27" r="5.5" fill="#1a1a1a"/>
+      <circle cx="81.5" cy="25.5" r="2" fill="white"/>
+      <!-- Wing hint -->
+      <path d="M14 64 Q32 54 50 64" stroke="#E6B800" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+    </symbol>
+  </svg>
+
   <!-- ── Navigation ──────────────────────────────────────────────────────── -->
   <nav class="nav">
     <div class="nav-inner">
-      <a href="#" class="nav-logo">🦆 Where's Louie?</a>
+      <a href="#" class="nav-logo">
+        <svg aria-hidden="true"><use href="#duck"/></svg>
+        Where's Louie?
+      </a>
       <div class="nav-links">
         <a href="#map">Route</a>
         <a href="#stories">Stories</a>
         <a href="#about">About</a>
-        <a href="#" class="nav-cta" id="submit-btn">📸 I Met Louie!</a>
+        <a href="#" class="nav-cta" id="submit-btn">I've Got Louie! →</a>
       </div>
     </div>
   </nav>
@@ -37,16 +59,16 @@
   <!-- ── Hero ────────────────────────────────────────────────────────────── -->
   <header class="hero">
     <div class="hero-content">
-      <div class="hero-duck" aria-hidden="true">🦆</div>
-      <h1>Where's Louie?</h1>
-      <p class="hero-sub">A rubber duck with a GPS backpack, sent out into the world.<br>Follow his route. Read his adventures. Pass him on.</p>
+      <svg class="hero-duck" aria-hidden="true"><use href="#duck"/></svg>
+      <h1>Louie's out there somewhere.</h1>
+      <p class="hero-sub">He's a rubber duck with a GPS tracker and absolutely zero agenda. He travels the country one stranger at a time — goes wherever you take him, genuinely loves the ride, and then gets passed on to whoever's next.</p>
       <div class="hero-status" id="hero-status">
         <div class="status-dot" id="status-dot"></div>
-        <span id="status-text">Loading last position…</span>
+        <span id="status-text">Tracking Louie…</span>
       </div>
       <div class="hero-actions">
-        <a href="#map" class="btn btn-primary">📍 See the Map</a>
-        <a href="#stories" class="btn btn-secondary">📖 Read Stories</a>
+        <a href="#map" class="btn btn-primary">See where he is →</a>
+        <a href="#stories" class="btn btn-secondary">Read his story</a>
       </div>
     </div>
   </header>
@@ -56,7 +78,7 @@
     <div class="stats-inner">
       <div class="stat">
         <span class="stat-value" id="stat-stops">—</span>
-        <span class="stat-label">stops</span>
+        <span class="stat-label">cities visited</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
@@ -66,7 +88,7 @@
       <div class="stat-divider"></div>
       <div class="stat">
         <span class="stat-value" id="stat-stories">—</span>
-        <span class="stat-label">community stories</span>
+        <span class="stat-label">people he's met</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
@@ -81,7 +103,7 @@
     <div class="section-inner">
       <div class="section-header">
         <h2>Louie's Route</h2>
-        <p class="section-sub">Every GPS ping logged as he travels. Gaps happen between cellular updates — he's just exploring off-grid.</p>
+        <p class="section-sub">Every city he's passed through. The gaps are just him being somewhere good.</p>
       </div>
       <div class="map-wrapper">
         <div id="leaflet-map"></div>
@@ -92,9 +114,6 @@
           <div class="legend-item">
             <span class="legend-dot legend-dot--current"></span> Current
           </div>
-          <div class="legend-item">
-            <span class="legend-dot legend-dot--stop"></span> Community stop
-          </div>
         </div>
       </div>
       <div class="map-no-data" id="map-no-data" style="display:none">
@@ -104,11 +123,11 @@
   </section>
 
   <!-- ── Stories ──────────────────────────────────────────────────────────── -->
-  <section class="section section--dark" id="stories">
+  <section class="section section--alt" id="stories">
     <div class="section-inner">
       <div class="section-header">
-        <h2>Community Stories</h2>
-        <p class="section-sub">Everyone who's spent time with Louie. The good, the weird, the wherever.</p>
+        <h2>People Louie's Met</h2>
+        <p class="section-sub">Everyone who's spent time with him. Where they took him. What they got up to.</p>
       </div>
 
       <div class="posts-grid" id="posts-grid">
@@ -116,8 +135,10 @@
       </div>
 
       <div class="posts-empty" id="posts-empty" style="display:none">
-        <div class="posts-empty-duck">🦆</div>
-        <p>No stories yet — Louie just set off! Be the first.</p>
+        <div class="posts-empty-duck">
+          <svg aria-hidden="true"><use href="#duck"/></svg>
+        </div>
+        <p>No stories yet — Louie just set off. Be the first.</p>
       </div>
 
       <div class="posts-loading" id="posts-loading">
@@ -126,9 +147,9 @@
       </div>
 
       <div class="submit-cta">
-        <h3>Did you meet Louie?</h3>
-        <p>Share where you took him and what you got up to. Photos very much welcome.</p>
-        <a href="#" class="btn btn-primary" id="submit-cta-btn">📸 Share Your Story</a>
+        <h3>Got Louie right now?</h3>
+        <p>Tell us where you took him and what you got up to. Photos very much welcome — he loves the attention.</p>
+        <a href="#" class="btn btn-primary" id="submit-cta-btn">Share your story →</a>
       </div>
     </div>
   </section>
@@ -138,14 +159,13 @@
     <div class="section-inner">
       <div class="about-grid">
         <div class="about-text">
-          <h2>What's this all about?</h2>
-          <p>Louie is a rubber duck with a <strong>Tracki GPS tracker</strong> strapped to his tiny backpack. He's inspired by <a href="https://en.wikipedia.org/wiki/HitchBOT" target="_blank" rel="noopener">Hitchbot</a> — the Canadian robot that hitchhiked across countries relying entirely on the kindness of strangers.</p>
-          <p>Louie travels the same way. He gets passed from person to person, going wherever they take him. He doesn't have a destination. He just goes.</p>
-          <p>His position is reported over the <strong>Tracki cellular network</strong> and logged here every 5 minutes. Wherever he goes, we know where Louie is.</p>
-          <p>This project is an experiment in community, trust, and the fun of building unnecessary things. If you've got Louie, take him somewhere interesting. Then pass him on.</p>
+          <h2>Just a duck living his best life.</h2>
+          <p>Louie was inspired by <a href="https://en.wikipedia.org/wiki/HitchBOT" target="_blank" rel="noopener">HitchBOT</a> — the Canadian robot that crossed countries on the kindness of strangers. Same idea, smaller budget, better vibes.</p>
+          <p>He travels with a <strong>Tracki GPS tracker</strong> strapped to his back. His location gets logged here every 5 minutes. He has no destination. He just goes.</p>
+          <p>The only rule: if you've got him, take him somewhere interesting. Then pass him on.</p>
           <div class="tech-stack">
             <span class="tech-tag">Tracki GPS</span>
-            <span class="tech-tag">Cellular</span>
+            <span class="tech-tag">Cellular 4G</span>
             <span class="tech-tag">Google Sheets</span>
             <span class="tech-tag">GitHub Pages</span>
             <span class="tech-tag">Leaflet.js</span>
@@ -153,7 +173,9 @@
         </div>
         <div class="about-image">
           <div class="about-duck-card">
-            <div class="duck-big" aria-hidden="true">🦆</div>
+            <div class="duck-big" aria-hidden="true">
+              <svg><use href="#duck"/></svg>
+            </div>
             <div class="duck-info">
               <div class="duck-info-row">
                 <span class="duck-label">Name</span>
@@ -165,11 +187,11 @@
               </div>
               <div class="duck-info-row">
                 <span class="duck-label">Tracker</span>
-                <span class="duck-value">Tracki GPS</span>
+                <span class="duck-value">Tracki GPS (4G)</span>
               </div>
               <div class="duck-info-row">
-                <span class="duck-label">Network</span>
-                <span class="duck-value">Cellular (4G)</span>
+                <span class="duck-label">Agenda</span>
+                <span class="duck-value">None whatsoever</span>
               </div>
               <div class="duck-info-row">
                 <span class="duck-label">Destination</span>
@@ -185,8 +207,11 @@
   <!-- ── Footer ───────────────────────────────────────────────────────────── -->
   <footer class="footer">
     <div class="footer-inner">
-      <div class="footer-logo">🦆 Where's Louie?</div>
-      <p class="footer-sub">A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.<br>Built with Tracki GPS, Google Workspace, and a rubber duck.</p>
+      <div class="footer-logo">
+        <svg aria-hidden="true"><use href="#duck"/></svg>
+        Where's Louie?
+      </div>
+      <p class="footer-sub">A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment in community and wandering.<br>Built with Tracki GPS, Google Workspace, and a rubber duck.</p>
       <div class="footer-links">
         <a href="https://tracki.com" target="_blank" rel="noopener">Tracki GPS</a>
         <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a>
@@ -199,7 +224,9 @@
     <article class="post-card">
       <div class="post-card-photo">
         <img class="post-photo-img" src="" alt="" loading="lazy">
-        <div class="post-photo-placeholder" aria-hidden="true">🦆</div>
+        <div class="post-photo-placeholder" aria-hidden="true">
+          <svg><use href="#duck"/></svg>
+        </div>
       </div>
       <div class="post-card-body">
         <div class="post-meta">
