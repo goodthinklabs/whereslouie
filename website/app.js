@@ -10,7 +10,7 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1TdexzgG17vAXaXPS5fdS602bHYA7LfRb8fm847AMB_JoWQGiyPBborvPqwP_95LlmQ/exec";
 
 // Google Form URL for submitting stories (update after creating your form)
-const GOOGLE_FORM_URL = "https://forms.gle/YOUR_FORM_LINK_HERE";
+const GOOGLE_FORM_URL = "https://forms.gle/kXjQrsgod1jKWhTd6";
 
 // How old a position must be (in hours) before we consider it "stale"
 const STALE_THRESHOLD_HOURS = 6;
