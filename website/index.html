@@ -4,247 +4,209 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Where's Louie?</title>
-  <meta name="description" content="Follow Louie the rubber duck on his adventures across the country. Track his GPS route and read stories from everyone he's met.">
+  <meta name="description" content="Louie is the AeroGrowth Network's outside sales rep. He's a rubber duck. He travels shop to shop in a cardboard mobile office. Follow his route.">
   <meta property="og:title" content="Where's Louie?">
-  <meta property="og:description" content="A rubber duck with a GPS tracker, sent on an adventure. Follow his route and the community that carries him.">
+  <meta property="og:description" content="Outside Sales Rep. Rubber duck. Not covered by workman's comp. Follow Louie's route across the country.">
+  <meta property="og:image" content="img/louie-badge.png">
   <meta property="og:type" content="website">
+  <meta name="theme-color" content="#FFD31A">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 85'%3E%3Cellipse cx='46' cy='67' rx='44' ry='22' fill='%23FFD31A'/%3E%3Ccircle cx='70' cy='38' r='24' fill='%23FFD31A'/%3E%3Cpath d='M90 31 L107 28 Q109 37 107 44 L90 43Z' fill='%23FF7A1A'/%3E%3Ccircle cx='80' cy='27' r='5.5' fill='%23111'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="img/louie-badge.png">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Leaflet CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ── Reusable rubber duck SVG (hidden, referenced via <use>) ────────────── -->
-  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-    <symbol id="duck" viewBox="0 0 108 85">
-      <!-- Body -->
-      <ellipse cx="46" cy="67" rx="44" ry="22" fill="#FFD93D"/>
-      <!-- Head (overlaps body top to form neck) -->
-      <circle cx="70" cy="38" r="24" fill="#FFD93D"/>
-      <!-- Beak -->
-      <path d="M90 31 L107 28 Q109 37 107 44 L90 43Z" fill="#FF8C38"/>
-      <!-- Beak centre line (subtle) -->
-      <line x1="90" y1="37" x2="107" y2="36" stroke="#D4692A" stroke-width="1.2" opacity="0.45"/>
-      <!-- Eye -->
-      <circle cx="80" cy="27" r="5.5" fill="#1a1a1a"/>
-      <circle cx="81.5" cy="25.5" r="2" fill="white"/>
-      <!-- Wing hint -->
-      <path d="M14 64 Q32 54 50 64" stroke="#E6B800" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.6"/>
-    </symbol>
-  </svg>
-
-  <!-- ── Navigation ──────────────────────────────────────────────────────── -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="#" class="nav-logo">
-        <svg aria-hidden="true"><use href="#duck"/></svg>
-        Where's Louie?
+  <!-- ── Top bar ───────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a href="#" class="wordmark" aria-label="Where's Louie? home">
+        <span class="face wordmark-face" aria-hidden="true"></span>
+        <span>where's louie?</span>
       </a>
-      <div class="nav-links">
-        <a href="#map">Route</a>
-        <a href="#stories">Stories</a>
-        <a href="#about">About</a>
-        <a href="#" class="nav-cta" id="submit-btn">I've Got Louie! →</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ── Hero ────────────────────────────────────────────────────────────── -->
-  <header class="hero">
-    <div class="hero-content">
-      <svg class="hero-duck" aria-hidden="true"><use href="#duck"/></svg>
-      <h1>Louie's out there somewhere.</h1>
-      <p class="hero-sub">He's a rubber duck with a GPS tracker and absolutely zero agenda. He travels the country one stranger at a time — goes wherever you take him, genuinely loves the ride, and then gets passed on to whoever's next.</p>
-      <div class="hero-status" id="hero-status">
-        <div class="status-dot" id="status-dot"></div>
-        <span id="status-text">Tracking Louie…</span>
-      </div>
-      <div class="hero-actions">
-        <a href="#map" class="btn btn-primary">See where he is →</a>
-        <a href="#stories" class="btn btn-secondary">Read his story</a>
-      </div>
+      <nav class="nav">
+        <a href="#route">Route</a>
+        <a href="#reports">Field reports</a>
+        <a href="#file">Personnel file</a>
+        <a href="#got-louie" class="nav-cta">Got Louie?</a>
+      </nav>
     </div>
   </header>
 
-  <!-- ── Stats bar ────────────────────────────────────────────────────────── -->
-  <section class="stats-bar">
-    <div class="stats-inner">
-      <div class="stat">
-        <span class="stat-value" id="stat-stops">—</span>
-        <span class="stat-label">cities visited</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-value" id="stat-miles">—</span>
-        <span class="stat-label">miles traveled</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-value" id="stat-stories">—</span>
-        <span class="stat-label">people he's met</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat">
-        <span class="stat-value" id="stat-battery">—</span>
-        <span class="stat-label">battery</span>
-      </div>
-    </div>
-  </section>
+  <main>
+    <!-- ── Route ───────────────────────────────────────────────────────── -->
+    <section class="section section--first" id="route">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Route</p>
+          <h2>Where he's been.</h2>
+          <p class="status status--below" id="status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="status-text">Checking in with Louie…</span>
+          </p>
+          <p class="section-sub" id="delay-note">The map runs a couple of days behind on purpose. A rep needs his privacy.</p>
+        </div>
 
-  <!-- ── Map ──────────────────────────────────────────────────────────────── -->
-  <section class="section" id="map">
-    <div class="section-inner">
-      <div class="section-header">
-        <h2>Louie's Route</h2>
-        <p class="section-sub">Every city he's passed through. The gaps are just him being somewhere good.</p>
-      </div>
-      <div class="map-wrapper">
-        <div id="leaflet-map"></div>
-        <div class="map-legend">
-          <div class="legend-item">
-            <span class="legend-dot legend-dot--start"></span> Start
-          </div>
-          <div class="legend-item">
-            <span class="legend-dot legend-dot--current"></span> Current
+        <div class="map-card">
+          <div id="leaflet-map" role="img" aria-label="Map of Louie's route"></div>
+          <div class="map-empty" id="map-no-data" hidden>
+            <span class="face map-empty-face" aria-hidden="true"></span>
+            <p>No stops to show yet. His first stop shows up a couple of days after he leaves it.</p>
           </div>
         </div>
-      </div>
-      <div class="map-no-data" id="map-no-data" style="display:none">
-        <p>No GPS data yet — check back soon!</p>
-      </div>
-    </div>
-  </section>
 
-  <!-- ── Stories ──────────────────────────────────────────────────────────── -->
-  <section class="section section--alt" id="stories">
-    <div class="section-inner">
-      <div class="section-header">
-        <h2>People Louie's Met</h2>
-        <p class="section-sub">Everyone who's spent time with him. Where they took him. What they got up to.</p>
-      </div>
-
-      <div class="posts-grid" id="posts-grid">
-        <!-- Populated by app.js -->
-      </div>
-
-      <div class="posts-empty" id="posts-empty" style="display:none">
-        <div class="posts-empty-duck">
-          <svg aria-hidden="true"><use href="#duck"/></svg>
+        <div class="log" id="log">
+          <div class="log-head">
+            <h3>Trip log</h3>
+            <span class="log-count" id="log-count"></span>
+          </div>
+          <ol class="log-list" id="stops-list"></ol>
         </div>
-        <p>No stories yet — Louie just set off. Be the first.</p>
       </div>
+    </section>
 
-      <div class="posts-loading" id="posts-loading">
-        <div class="loading-spinner"></div>
-        <p>Loading stories…</p>
+    <!-- ── Stats ───────────────────────────────────────────────────────── -->
+    <section class="stats" aria-label="Louie's numbers">
+      <div class="wrap stats-grid">
+        <div class="stat"><span class="stat-value" id="stat-miles">—</span><span class="stat-label">miles traveled</span></div>
+        <div class="stat"><span class="stat-value" id="stat-states">—</span><span class="stat-label">states visited</span></div>
+        <div class="stat"><span class="stat-value" id="stat-days">—</span><span class="stat-label">days on the road</span></div>
+        <div class="stat"><span class="stat-value stat-value--mood" id="stat-battery">—</span><span class="stat-label">energy level</span></div>
       </div>
+    </section>
 
-      <div class="submit-cta">
-        <h3>Got Louie right now?</h3>
-        <p>Tell us where you took him and what you got up to. Photos very much welcome — he loves the attention.</p>
-        <a href="#" class="btn btn-primary" id="submit-cta-btn">Share your story →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── About ────────────────────────────────────────────────────────────── -->
-  <section class="section" id="about">
-    <div class="section-inner">
-      <div class="about-grid">
-        <div class="about-text">
-          <h2>Just a duck living his best life.</h2>
-          <p>Louie was inspired by <a href="https://en.wikipedia.org/wiki/HitchBOT" target="_blank" rel="noopener">HitchBOT</a> — the Canadian robot that crossed countries on the kindness of strangers. Same idea, smaller budget, better vibes.</p>
-          <p>He travels with a <strong>Tracki GPS tracker</strong> strapped to his back. His location gets logged here every 5 minutes. He has no destination. He just goes.</p>
-          <p>The only rule: if you've got him, take him somewhere interesting. Then pass him on.</p>
-          <div class="tech-stack">
-            <span class="tech-tag">Tracki GPS</span>
-            <span class="tech-tag">Cellular 4G</span>
-            <span class="tech-tag">Google Sheets</span>
-            <span class="tech-tag">GitHub Pages</span>
-            <span class="tech-tag">Leaflet.js</span>
+    <!-- ── Hero ────────────────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1>Louie is out<br>in the field.</h1>
+          <p class="lede">
+            He's the AeroGrowth Network's outside sales rep. He's also a rubber duck.
+            He travels shop to shop in a cardboard mobile office, makes friends on the
+            shop floor, and then gets shipped to the next stop.
+          </p>
+          <div class="hero-actions">
+            <a href="#file" class="btn btn-dark">Read his file</a>
+            <a href="#got-louie" class="btn btn-ghost">I've got Louie</a>
           </div>
         </div>
-        <div class="about-image">
-          <div class="about-duck-card">
-            <div class="duck-big" aria-hidden="true">
-              <svg><use href="#duck"/></svg>
-            </div>
-            <div class="duck-info">
-              <div class="duck-info-row">
-                <span class="duck-label">Name</span>
-                <span class="duck-value">Louie</span>
-              </div>
-              <div class="duck-info-row">
-                <span class="duck-label">Species</span>
-                <span class="duck-value">Rubber Duck</span>
-              </div>
-              <div class="duck-info-row">
-                <span class="duck-label">Tracker</span>
-                <span class="duck-value">Tracki GPS (4G)</span>
-              </div>
-              <div class="duck-info-row">
-                <span class="duck-label">Agenda</span>
-                <span class="duck-value">None whatsoever</span>
-              </div>
-              <div class="duck-info-row">
-                <span class="duck-label">Destination</span>
-                <span class="duck-value">Wherever you take him</span>
-              </div>
-            </div>
+
+        <figure class="badge-wrap">
+          <div class="lanyard" aria-hidden="true"></div>
+          <img src="img/louie-badge.png" alt="Louie's AeroGrowth Network employee badge: Louie, Outside Sales Rep" class="badge" width="698" height="522">
+        </figure>
+      </div>
+    </section>
+
+
+
+    <!-- ── Field reports ───────────────────────────────────────────────── -->
+    <section class="section section--tint" id="reports">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Field reports</p>
+          <h2>Notes from the shop floor.</h2>
+          <p class="section-sub">Filed by the people who hosted him. Reports go up a couple of days after they come in.</p>
+        </div>
+        <div class="reports" id="posts-grid"></div>
+        <div class="reports-empty" id="posts-empty" hidden>
+          <p>No field reports yet. Louie is waiting for someone to write him up.</p>
+        </div>
+        <p class="reports-loading" id="posts-loading">Loading reports…</p>
+      </div>
+    </section>
+
+    <!-- ── Personnel file ──────────────────────────────────────────────── -->
+    <section class="section" id="file">
+      <div class="wrap file-grid">
+        <div class="file-photo">
+          <img src="img/louie-in-the-box.jpg" alt="Louie the rubber duck in his shipping box, wearing his badge, next to AeroGrowth merit badge tins" loading="lazy">
+          <p class="caption">Louie at his desk.</p>
+        </div>
+
+        <div class="file">
+          <p class="eyebrow">Personnel file</p>
+          <h2>Louie</h2>
+          <dl class="file-list">
+            <div><dt>Title</dt><dd>Outside Sales Rep &amp; Brand Ambassador</dd></div>
+            <div><dt>Employer</dt><dd>AeroGrowth Network</dd></div>
+            <div><dt>Species</dt><dd>Rubber duck</dd></div>
+            <div><dt>Office</dt><dd>Cardboard box, mobile</dd></div>
+            <div><dt>Specialties</dt><dd>Sitting in mills, riding robot arms, rubber duck debugging</dd></div>
+            <div><dt>Benefits</dt><dd>None. He is not covered by workman's comp.</dd></div>
+            <div><dt>Compensation</dt><dd>His agent takes most of it.</dd></div>
+            <div><dt>5-year goal</dt><dd>Director of Intergalactic Sales, by SpaceX rideshare</dd></div>
+            <div><dt>HR notes</dt><dd>Cute yellow body. Unhinged megalomaniac. Both are working as intended.</dd></div>
+          </dl>
+          <div class="merit">
+            <p class="merit-label">Merit badges on file</p>
+            <ul class="chips">
+              <li>Mansplaining</li>
+              <li>Micromanager</li>
+              <li>Didn't Make It Worse</li>
+              <li>Ready. Fire. Aim!</li>
+            </ul>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+    <!-- ── Got Louie? ──────────────────────────────────────────────────── -->
+    <section class="section section--yellow" id="got-louie">
+      <div class="wrap got-grid">
+        <div>
+          <p class="eyebrow eyebrow--dark">Got Louie?</p>
+          <h2>Handling instructions.</h2>
+          <ol class="steps">
+            <li>
+              <strong>Open the box carefully.</strong>
+              <span>His head is right under the tape. Try not to cut it.</span>
+            </li>
+            <li>
+              <strong>Put him to work.</strong>
+              <span>The shop floor, a mill, a robot arm, a meeting he wasn't invited to. He's not picky.</span>
+            </li>
+            <li>
+              <strong>File a field report.</strong>
+              <span>Tell us where you took him and what happened. Photos strongly encouraged.</span>
+            </li>
+            <li>
+              <strong>Pack him back up.</strong>
+              <span>Leave his tracker where it is. Then send him on to the next stop.</span>
+            </li>
+          </ol>
+          <a href="#" class="btn btn-dark" id="report-btn">File a field report</a>
+        </div>
+        <figure class="got-photo">
+          <img src="img/mobile-office.jpg" alt="Louie's mobile office: a cardboard box covered in AeroGrowth stickers and his badge" loading="lazy">
+        </figure>
+      </div>
+    </section>
+  </main>
+
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-logo">
-        <svg aria-hidden="true"><use href="#duck"/></svg>
-        Where's Louie?
-      </div>
-      <p class="footer-sub">A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment in community and wandering.<br>Built with Tracki GPS, Google Workspace, and a rubber duck.</p>
-      <div class="footer-links">
-        <a href="https://tracki.com" target="_blank" rel="noopener">Tracki GPS</a>
-        <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a>
-      </div>
+    <div class="wrap footer-inner">
+      <p><strong>where's louie?</strong> A rubber duck, a GPS tracker, and a lot of cardboard.</p>
+      <p class="footer-small">Louie works for the <a href="https://www.aerogrowthllc.com" target="_blank" rel="noopener">AeroGrowth Network</a>. A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.</p>
     </div>
   </footer>
 
-  <!-- ── Post card template (hidden, cloned by JS) ────────────────────────── -->
   <template id="post-card-template">
-    <article class="post-card">
-      <div class="post-card-photo">
-        <img class="post-photo-img" src="" alt="" loading="lazy">
-        <div class="post-photo-placeholder" aria-hidden="true">
-          <svg><use href="#duck"/></svg>
-        </div>
-      </div>
-      <div class="post-card-body">
-        <div class="post-meta">
-          <span class="post-number"></span>
-          <span class="post-location">📍 </span>
-        </div>
+    <article class="report">
+      <div class="report-photo"><img class="post-photo-img" src="" alt="" loading="lazy"></div>
+      <div class="report-body">
+        <p class="report-meta"><span class="post-number"></span> · <span class="post-location"></span></p>
         <p class="post-story"></p>
-        <div class="post-footer">
-          <span class="post-name"></span>
-          <span class="post-date"></span>
-        </div>
+        <p class="report-foot"><span class="post-name"></span><span class="post-date"></span></p>
       </div>
     </article>
   </template>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script src="app.js"></script>
 </body>
 </html>
