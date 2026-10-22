@@ -43,6 +43,7 @@ async function loadData() {
     renderMap(stops);
     renderLog(stops);
     renderPosts(data.posts || []);
+    renderSpotted(data.spotted || []);
   } catch (err) {
     console.error("Failed to load Louie data:", err);
     renderOfflineState();
@@ -181,6 +182,19 @@ function convertDriveUrl(url) {
   return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800` : url;
 }
 
+// ── Spotted on LinkedIn ──────────────────────────────────────────────────────
+
+function renderSpotted(items) {
+  const grid = document.getElementById("spotted-grid");
+  if (!items.length) { document.getElementById("spotted-empty").hidden = false; return; }
+  grid.innerHTML = items.map(p => `
+    <figure class="spot">
+      <iframe src="${escapeHtml(p.embed)}" title="LinkedIn post featuring Louie" loading="lazy" allowfullscreen></iframe>
+      <figcaption><span>${escapeHtml(formatDate(new Date(p.date + "T12:00:00Z")))}</span>
+        <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">View on LinkedIn ↗</a></figcaption>
+    </figure>`).join("");
+}
+
 // ── Offline ──────────────────────────────────────────────────────────────────
 
 function renderOfflineState() {
@@ -191,6 +205,7 @@ function renderOfflineState() {
   document.getElementById("map-no-data").hidden = false;
   document.getElementById("leaflet-map").hidden = true;
   document.getElementById("log").hidden = true;
+  document.getElementById("spotted-empty").hidden = false;
 }
 
 // ── Utilities ────────────────────────────────────────────────────────────────

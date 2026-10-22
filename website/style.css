@@ -279,3 +279,26 @@ h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
 .section--first + .stats { margin-top: 0; }
 .hero { border-top: 1px solid var(--line); }
 @media (max-width: 860px) { .section--first { padding-top: 36px; } }
+
+/* Follow links under the hero buttons */
+.follow { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; }
+.follow a {
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 600; color: var(--ink-2);
+  text-decoration: underline; text-decoration-color: var(--yellow); text-decoration-thickness: 3px; text-underline-offset: 4px;
+}
+.follow a:hover { color: var(--ink); }
+.file-list dd a { text-decoration-color: var(--yellow); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* Spotted on LinkedIn */
+.spotted { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.spot { background: var(--card); border: 2px solid var(--ink); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.spot iframe { width: 100%; height: 560px; border: 0; display: block; background: #fff; }
+.spot figcaption {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 10px 14px; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 0.78rem; color: var(--muted);
+}
+.spot figcaption a { color: var(--ink); font-weight: 600; text-decoration-color: var(--yellow); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.spotted-more { margin-top: 24px; text-align: center; }
+.reports-empty a { text-decoration-color: var(--yellow); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+@media (max-width: 640px) { .spot iframe { height: 500px; } }

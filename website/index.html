@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Where's Louie?</title>
-  <meta name="description" content="Louie is the AeroGrowth Network's outside sales rep. He's a rubber duck. He travels shop to shop in a cardboard mobile office. Follow his route.">
+  <meta name="description" content="Louie is a rubber duck who travels the country meeting people. Some days he's on a shop floor, some days he's hanging out with friends. Follow his route.">
   <meta property="og:title" content="Where's Louie?">
-  <meta property="og:description" content="Outside Sales Rep. Rubber duck. Not covered by workman's comp. Follow Louie's route across the country.">
+  <meta property="og:description" content="Outside Sales Rep. Rubber duck. Professional friend-maker. Follow Louie's route across the country.">
   <meta property="og:image" content="img/louie-badge.png">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#FFD31A">
@@ -31,6 +31,7 @@
       <nav class="nav">
         <a href="#route">Route</a>
         <a href="#reports">Field reports</a>
+        <a href="#spotted">LinkedIn</a>
         <a href="#file">Personnel file</a>
         <a href="#got-louie" class="nav-cta">Got Louie?</a>
       </nav>
@@ -86,13 +87,19 @@
           <h1>Louie is out<br>in the field.</h1>
           <p class="lede">
             He's the AeroGrowth Network's outside sales rep. He's also a rubber duck.
-            He travels shop to shop in a cardboard mobile office, makes friends on the
-            shop floor, and then gets shipped to the next stop.
+            He travels the country one person at a time. Some days he's working the
+            shop floor. Some days he's just hanging out with friends. Then he gets
+            packed up and sent to the next person.
           </p>
           <div class="hero-actions">
             <a href="#file" class="btn btn-dark">Read his file</a>
             <a href="#got-louie" class="btn btn-ghost">I've got Louie</a>
           </div>
+          <ul class="follow" aria-label="Follow Louie">
+            <li><a href="https://www.linkedin.com/company/louie-the-duck/" target="_blank" rel="noopener">Louie on LinkedIn ↗</a></li>
+            <li><a href="https://open.spotify.com/show/033w6cqGvKnD5avXBHDIfK" target="_blank" rel="noopener">The AeroGrowth Podcast ↗</a></li>
+            <li><a href="https://www.aerogrowthllc.com" target="_blank" rel="noopener">AeroGrowth ↗</a></li>
+          </ul>
         </div>
 
         <figure class="badge-wrap">
@@ -109,8 +116,8 @@
       <div class="wrap">
         <div class="section-head">
           <p class="eyebrow">Field reports</p>
-          <h2>Notes from the shop floor.</h2>
-          <p class="section-sub">Filed by the people who hosted him. Reports go up a couple of days after they come in.</p>
+          <h2>Notes from the people he's met.</h2>
+          <p class="section-sub">Written by the friends, coworkers, and strangers who spent time with him. Reports go up a couple of days after they come in.</p>
         </div>
         <div class="reports" id="posts-grid"></div>
         <div class="reports-empty" id="posts-empty" hidden>
@@ -120,8 +127,24 @@
       </div>
     </section>
 
+    <!-- ── Spotted on LinkedIn ───────────────────────────────────────── -->
+    <section class="section" id="spotted">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Spotted on LinkedIn</p>
+          <h2>Tagged in the wild.</h2>
+          <p class="section-sub">Posts Louie shows up in. Same rule as the map: they appear a couple of days after they're posted.</p>
+        </div>
+        <div class="spotted" id="spotted-grid"></div>
+        <div class="reports-empty" id="spotted-empty" hidden>
+          <p>Nothing here yet. Post a photo with Louie and <a href="https://www.linkedin.com/company/louie-the-duck/" target="_blank" rel="noopener">tag him on LinkedIn</a>.</p>
+        </div>
+        <p class="spotted-more"><a href="https://www.linkedin.com/company/louie-the-duck/" target="_blank" rel="noopener" class="btn btn-ghost">Follow Louie on LinkedIn ↗</a></p>
+      </div>
+    </section>
+
     <!-- ── Personnel file ──────────────────────────────────────────────── -->
-    <section class="section" id="file">
+    <section class="section section--tint" id="file">
       <div class="wrap file-grid">
         <div class="file-photo">
           <img src="img/louie-in-the-box.jpg" alt="Louie the rubber duck in his shipping box, wearing his badge, next to AeroGrowth merit badge tins" loading="lazy">
@@ -136,11 +159,13 @@
             <div><dt>Employer</dt><dd>AeroGrowth Network</dd></div>
             <div><dt>Species</dt><dd>Rubber duck</dd></div>
             <div><dt>Office</dt><dd>Cardboard box, mobile</dd></div>
-            <div><dt>Specialties</dt><dd>Sitting in mills, riding robot arms, rubber duck debugging</dd></div>
+            <div><dt>Specialties</dt><dd>Making friends, sitting in mills, riding robot arms, rubber duck debugging</dd></div>
+            <div><dt>Territory</dt><dd>Wherever his friends are</dd></div>
             <div><dt>Benefits</dt><dd>None. He is not covered by workman's comp.</dd></div>
             <div><dt>Compensation</dt><dd>His agent takes most of it.</dd></div>
             <div><dt>5-year goal</dt><dd>Director of Intergalactic Sales, by SpaceX rideshare</dd></div>
             <div><dt>HR notes</dt><dd>Cute yellow body. Unhinged megalomaniac. Both are working as intended.</dd></div>
+            <div><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/company/louie-the-duck/" target="_blank" rel="noopener">linkedin.com/company/louie-the-duck</a></dd></div>
           </dl>
           <div class="merit">
             <p class="merit-label">Merit badges on file</p>
@@ -167,12 +192,12 @@
               <span>His head is right under the tape. Try not to cut it.</span>
             </li>
             <li>
-              <strong>Put him to work.</strong>
-              <span>The shop floor, a mill, a robot arm, a meeting he wasn't invited to. He's not picky.</span>
+              <strong>Take him along.</strong>
+              <span>The shop floor, a backyard cookout, a road trip, a meeting he wasn't invited to. He's not picky.</span>
             </li>
             <li>
               <strong>File a field report.</strong>
-              <span>Tell us where you took him and what happened. Photos strongly encouraged.</span>
+              <span>Tell us who he met and what happened. Photos strongly encouraged. Tag him on LinkedIn too.</span>
             </li>
             <li>
               <strong>Pack him back up.</strong>
@@ -191,7 +216,12 @@
   <footer class="footer">
     <div class="wrap footer-inner">
       <p><strong>where's louie?</strong> A rubber duck, a GPS tracker, and a lot of cardboard.</p>
-      <p class="footer-small">Louie works for the <a href="https://www.aerogrowthllc.com" target="_blank" rel="noopener">AeroGrowth Network</a>. A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.</p>
+      <p class="footer-small">
+        <a href="https://www.linkedin.com/company/louie-the-duck/" target="_blank" rel="noopener">LinkedIn</a> ·
+        <a href="https://open.spotify.com/show/033w6cqGvKnD5avXBHDIfK" target="_blank" rel="noopener">The AeroGrowth Podcast</a> ·
+        <a href="https://www.aerogrowthllc.com" target="_blank" rel="noopener">AeroGrowth</a> ·
+        A <a href="https://www.goodthinklabs.com" target="_blank" rel="noopener">Good Think Labs</a> experiment.
+      </p>
     </div>
   </footer>
 
