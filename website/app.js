@@ -9,6 +9,18 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1TdexzgG17vAXaXPS5fdS602bHYA7LfRb8fm847AMB_JoWQGiyPBborvPqwP_95LlmQ/exec";
 const GOOGLE_FORM_URL = "https://forms.gle/kXjQrsgod1jKWhTd6";
 const LOG_PREVIEW = 8;
+const STATE_NAMES = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado",
+  CT: "Connecticut", DE: "Delaware", DC: "D.C.", FL: "Florida", GA: "Georgia", HI: "Hawaii",
+  ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky",
+  LA: "Louisiana", ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan",
+  MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska",
+  NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
+  NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon",
+  PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
+  TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington",
+  WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+};
 
 let map;
 
@@ -59,15 +71,25 @@ function renderHeadline(latest, delayHours) {
     text.textContent = "Just getting started. First stop coming soon.";
     return;
   }
-  const when = formatRelativeTime(new Date(latest.left));
-  text.textContent = latest.secret
-    ? `Last seen at a secret location · ${when}`
-    : `Last seen in ${latest.label} · ${when}`;
+  // "here" = still parked at this stop as of the delayed snapshot.
+  const when = formatRelativeTime(new Date(latest.here ? latest.as_of : latest.left));
+  if (latest.here) {
+    const where = STATE_NAMES[latest.state] || latest.state;
+    text.textContent = latest.secret
+      ? `Resting at a secret location${where ? ` in ${where}` : ""} · ${when}`
+      : `Hanging out near ${latest.label} · ${when}`;
+  } else {
+    text.textContent = latest.secret
+      ? `Last seen at a secret location · ${when}`
+      : `Last seen in ${latest.label} · ${when}`;
+  }
 
   const note = document.getElementById("delay-note");
   if (note && delayHours) {
-    const days = Math.max(1, Math.round(delayHours / 24));
-    note.textContent = `The map runs about ${days} day${days === 1 ? "" : "s"} behind on purpose. A rep needs his privacy.`;
+    const lag = delayHours < 24
+      ? `${delayHours} hours`
+      : `${Math.round(delayHours / 24)} day${Math.round(delayHours / 24) === 1 ? "" : "s"}`;
+    note.textContent = `The map runs about ${lag} behind on purpose, and when he's parked we only say roughly where. A rep needs his privacy.`;
   }
 }
 
@@ -99,6 +121,21 @@ function renderMap(stops) {
     const isFirst = i === 0, isLast = i === onMap.length - 1;
     const label = escapeHtml(s.label);
     let html, anchor;
+    if (isLast && s.here) {
+      // Parked: the server sends only a deliberately offset centre and a big
+      // radius, so the circle is all anyone (including us) gets to see.
+      const circle = L.circle([s.lat, s.lng], {
+        radius: s.radius_m || 10000,
+        color: "#111111", weight: 2, dashArray: "6 6",
+        fillColor: "#FFD31A", fillOpacity: 0.35,
+      }).addTo(map);
+      circle.bindPopup(`<strong>Somewhere around here</strong><br><span style="font-family:var(--mono);font-size:.8rem">${escapeHtml(s.label)} area · since ${formatDate(new Date(s.arrived + "T12:00:00Z"))}</span>`);
+      L.marker([s.lat, s.lng], {
+        icon: L.divIcon({ html: `<div class="louie-pin louie-pin--zone"><span class="face" aria-hidden="true"></span><span class="pin-label">Around ${label}</span></div>`, className: "", iconSize: null, iconAnchor: [26, 26] }),
+        zIndexOffset: 1000, interactive: false,
+      }).addTo(map);
+      return;
+    }
     if (isLast) {
       html = `<div class="louie-pin"><span class="face" aria-hidden="true"></span><span class="pin-label">${label}</span></div>`;
       anchor = [26, 26];
@@ -113,7 +150,11 @@ function renderMap(stops) {
     if (!isFirst && !isLast) marker.bindTooltip(label, { direction: "top", offset: [0, -8] });
     marker.bindPopup(`<strong>${label}</strong><br><span style="font-family:var(--mono);font-size:.8rem">${stayText(s)}</span>`);
   });
-  map.fitBounds(L.latLngBounds(latlngs).pad(0.15), { maxZoom: 8 });
+  // Never zoom in tighter than the parked circle; keep the whole circle in view.
+  const last = onMap[onMap.length - 1];
+  const bounds = L.latLngBounds(latlngs);
+  if (last.here) bounds.extend(L.latLng(last.lat, last.lng).toBounds(2 * (last.radius_m || 10000)));
+  map.fitBounds(bounds.pad(0.15), { maxZoom: 9 });
 }
 
 // ── Trip log ─────────────────────────────────────────────────────────────────
@@ -127,7 +168,7 @@ function renderLog(stops) {
   list.innerHTML = items.map(({ s, n }, i) => `
     <li class="stop${s.secret ? " stop--secret" : ""}${i === 0 ? " stop--latest" : ""}"${i >= LOG_PREVIEW ? " hidden" : ""}>
       <span class="stop-n">${String(n).padStart(2, "0")}</span>
-      <span class="stop-name">${escapeHtml(s.secret ? "Resting at a secret location" : s.label)}</span>
+      <span class="stop-name">${escapeHtml(s.secret ? "Resting at a secret location" : (s.here ? `Around ${s.label}` : s.label))}</span>
       <span class="stop-date">${stayText(s)}</span>
     </li>`).join("");
 
@@ -145,6 +186,7 @@ function renderLog(stops) {
 
 function stayText(s) {
   const a = formatDate(new Date(s.arrived + "T12:00:00Z"));
+  if (s.here) return `${a} – now-ish`;
   const b = formatDate(new Date(s.left));
   return a === b ? a : `${a} – ${b}`;
 }
